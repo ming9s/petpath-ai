@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PetPath AI 산책 안전지도</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f4faf9;
+      color: #123;
+    }
+    .app {
+      width: 100%;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      height: 78px;
+      background: rgba(255,255,255,0.96);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 34px;
+      border-bottom: 1px solid #e3ecea;
+      box-shadow: 0 4px 18px rgba(20,60,70,.06);
+      z-index: 5;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 900;
+      font-size: 28px;
+      color: #073b63;
+    }
+    .logo span { color: #13a39a; }
+    nav {
+      display: flex;
+      gap: 32px;
+      font-size: 15px;
+      color: #485b65;
+      font-weight: 700;
+    }
+    nav .active { color: #07948d; border-bottom: 3px solid #07948d; padding-bottom: 26px; }
+    .region {
+      padding: 12px 18px;
+      border: 1px solid #d9e5e2;
+      border-radius: 12px;
+      background: #fff;
+      font-weight: 700;
+      color: #41535b;
+    }
+    main {
+      position: relative;
+      flex: 1;
+      overflow: hidden;
+    }
+    .map {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(90deg, rgba(7,148,141,.06) 1px, transparent 1px),
+        linear-gradient(rgba(7,148,141,.06) 1px, transparent 1px),
+        #f8fbfa;
+      background-size: 64px 64px;
+    }
+    .park {
+      position: absolute;
+      right: 80px;
+      top: 160px;
+      width: 420px;
+      height: 520px;
+      background: #dff4dd;
+      border-radius: 45% 55% 40% 60%;
+      border: 2px solid #c3e8bf;
+    }
+    .pond {
+      position: absolute;
+      right: 210px;
+      top: 425px;
+      width: 130px;
+      height: 82px;
+      background: #bde4f4;
+      border-radius: 50%;
+      opacity: .8;
+    }
+    .building, .school, .hospital {
+      position: absolute;
+      border-radius: 14px;
+      padding: 10px 14px;
+      background: #fff;
+      border: 1px solid #dce8e6;
+      box-shadow: 0 8px 26px rgba(20,50,70,.08);
+      font-weight: 800;
+      color: #27414d;
+      white-space: nowrap;
+    }
+    .school {
+      left: 55%;
+      top: 43%;
+      transform: translate(-50%,-50%);
+      background: #eaf2ff;
+      border-color: #b8d3ff;
+      color: #2051a3;
+    }
+    .hospital { left: 58%; top: 63%; color: #c74343; }
+    .building.b1 { left: 43%; top: 14%; }
+    .building.b2 { right: 160px; top: 255px; background: #ecfff5; color: #127a4d; }
+    .building.b3 { right: 210px; bottom: 210px; background: #ecfff5; color: #127a4d; }
+    .road {
+      position: absolute;
+      border-radius: 999px;
+      opacity: .78;
+    }
+    .road.red { background: #ff6b5f; box-shadow: 0 0 0 18px rgba(255,107,95,.16); }
+    .road.orange { background: #ffa345; box-shadow: 0 0 0 16px rgba(255,163,69,.15); }
+    .road.yellow { background: #ffd15c; box-shadow: 0 0 0 14px rgba(255,209,92,.16); }
+    .road.green { background: #26b978; box-shadow: 0 0 0 15px rgba(38,185,120,.15); }
+    .r1 { width: 17px; height: 790px; left: 39%; top: -80px; transform: rotate(20deg); }
+    .r2 { width: 18px; height: 620px; left: 48%; top: 60px; transform: rotate(-22deg); }
+    .r3 { width: 17px; height: 650px; left: 60%; top: 140px; transform: rotate(25deg); }
+    .r4 { width: 18px; height: 520px; right: 240px; top: 190px; transform: rotate(63deg); }
+    .safe-route {
+      position: absolute;
+      left: 47%;
+      top: 50%;
+      width: 500px;
+      height: 270px;
+      border: 10px dotted #0bb36f;
+      border-left-color: transparent;
+      border-bottom-color: #0bb36f;
+      border-radius: 45% 55% 50% 50%;
+      transform: rotate(-8deg);
+      filter: drop-shadow(0 3px 0 rgba(0,0,0,.08));
+    }
+    .pin {
+      position: absolute;
+      width: 42px;
+      height: 42px;
+      border-radius: 50% 50% 50% 8px;
+      transform: rotate(-45deg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 20px;
+      font-weight: 900;
+      box-shadow: 0 8px 20px rgba(0,0,0,.18);
+    }
+    .pin span { transform: rotate(45deg); }
+    .pin.red { background:#ef4444; }
+    .pin.orange { background:#f97316; }
+    .pin.green { background:#16a34a; }
+    .pin.blue { background:#2563eb; }
+    .pin.purple { background:#8b5cf6; }
+    .p1 { left: 42%; top: 20%; }
+    .p2 { left: 50%; top: 50%; }
+    .p3 { left: 66%; top: 33%; }
+    .p4 { right: 250px; top: 56%; }
+    .p5 { right: 385px; bottom: 190px; }
+    .panel {
+      position: absolute;
+      left: 28px;
+      top: 28px;
+      width: 355px;
+      background: rgba(255,255,255,.94);
+      border: 1px solid #dfe9e7;
+      border-radius: 22px;
+      box-shadow: 0 16px 38px rgba(18,52,68,.12);
+      padding: 24px;
+    }
+    h1 { margin: 0 0 10px; color: #078981; font-size: 28px; }
+    .panel p { margin: 0 0 18px; color: #53656e; line-height: 1.55; font-size: 14px; }
+    .select-box {
+      border: 1px solid #dbe6e5;
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 14px;
+      background: #fff;
+      font-weight: 700;
+      color: #334b56;
+    }
+    .risk-list { margin-top: 18px; border-top: 1px solid #edf2f1; }
+    .risk-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 13px 0;
+      border-bottom: 1px solid #edf2f1;
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .badge {
+      padding: 6px 10px;
+      border-radius: 999px;
+      color: white;
+      font-size: 12px;
+    }
+    .high { background:#ef5b45; }
+    .mid { background:#f6b93b; color:#563b00; }
+    .low { background:#2eb872; }
+    .ai-result {
+      margin-top: 18px;
+      background: linear-gradient(135deg,#07948d,#0db799);
+      color: #fff;
+      padding: 18px;
+      border-radius: 18px;
+      line-height: 1.58;
+      font-size: 14px;
+      box-shadow: 0 12px 24px rgba(7,148,141,.22);
+    }
+    .ai-result strong { display: block; margin-bottom: 8px; font-size: 17px; }
+    .safezone-card {
+      position: absolute;
+      right: 34px;
+      bottom: 36px;
+      width: 355px;
+      background: rgba(255,255,255,.94);
+      border: 1px solid #dfe9e7;
+      border-radius: 22px;
+      padding: 20px;
+      box-shadow: 0 16px 38px rgba(18,52,68,.12);
+    }
+    .safezone-card h2 { margin:0 0 12px; font-size:20px; color:#123b50; }
+    .place {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 0;
+      border-bottom: 1px solid #eef3f2;
+      font-size: 14px;
+      color: #40535c;
+      font-weight: 700;
+    }
+    .legend {
+      position: absolute;
+      left: 420px;
+      bottom: 36px;
+      background: rgba(255,255,255,.94);
+      border: 1px solid #dfe9e7;
+      border-radius: 16px;
+      padding: 14px 18px;
+      display: flex;
+      gap: 18px;
+      align-items: center;
+      box-shadow: 0 12px 28px rgba(18,52,68,.10);
+      font-size: 13px;
+      font-weight: 700;
+      color: #4a5d65;
+    }
+    .dot { width:14px; height:14px; border-radius:50%; display:inline-block; margin-right:6px; vertical-align:-2px; }
+    .d-red { background:#ef4444; } .d-orange{background:#f97316;} .d-yellow{background:#facc15;} .d-green{background:#22c55e;} .d-blue{background:#3b82f6;}
+    .label {
+      position: absolute;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: white;
+      border: 1px solid #d9e8e4;
+      box-shadow: 0 8px 20px rgba(0,0,0,.08);
+      font-weight: 800;
+      color: #31505e;
+      font-size: 13px;
+    }
+    .l1 { left: 62%; top: 35%; color:#e25b2d; }
+    .l2 { left: 70%; top: 45%; color:#8360b8; }
+    .l3 { left: 67%; top: 53%; color:#119c61; background:#eafff4; }
+    @media (max-width: 900px) {
+      header { padding: 0 18px; }
+      nav { display: none; }
+      .panel { width: calc(100% - 40px); left: 20px; top: 20px; }
+      .safezone-card, .legend { display:none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="logo">🐾 PetPath <span>AI</span></div>
+      <nav>
+        <div>홈</div>
+        <div class="active">AI 안전지도</div>
+        <div>세이프존</div>
+        <div>추천 산책코스</div>
+        <div>데이터 분석</div>
+      </nav>
+      <div class="region">📍 부산진구</div>
+    </header>
+
+    <main>
+      <div class="map">
+        <div class="park"></div>
+        <div class="pond"></div>
+        <div class="road red r1"></div>
+        <div class="road red r2"></div>
+        <div class="road yellow r3"></div>
+        <div class="road green r4"></div>
+        <div class="safe-route"></div>
+
+        <div class="building b1">🚉 서면역</div>
+        <div class="building b2">🌳 부전공원</div>
+        <div class="building b3">🌲 시민공원</div>
+        <div class="school">🏫 부산진고등학교</div>
+        <div class="hospital">🏥 이샘동물병원 24시</div>
+
+        <div class="pin red p1"><span>🚗</span></div>
+        <div class="pin purple p2"><span>🐾</span></div>
+        <div class="pin orange p3"><span>🌡</span></div>
+        <div class="pin green p4"><span>🏠</span></div>
+        <div class="pin blue p5"><span>➕</span></div>
+
+        <div class="label l1">교통·도로 위험</div>
+        <div class="label l2">야간 조도 정보</div>
+        <div class="label l3">추천 경로: 안전 우선</div>
+      </div>
+
+      <section class="panel">
+        <h1>AI 산책 안전지도</h1>
+        <p>학교 주변 통학 환경과 지역 데이터를 기반으로 반려동물 산책 위험도를 분석합니다.</p>
+
+        <div class="select-box">🏫 학교 선택: 부산진고등학교</div>
+        <div class="select-box">🕖 시간 선택: 오후 7시 ~ 8시</div>
+
+        <div class="risk-list">
+          <div class="risk-row">🌡 폭염 위험 <span class="badge high">높음</span></div>
+          <div class="risk-row">🚗 교통량 위험 <span class="badge high">높음</span></div>
+          <div class="risk-row">💡 야간 조도 <span class="badge mid">주의</span></div>
+          <div class="risk-row">🌧 침수 위험 <span class="badge low">낮음</span></div>
+          <div class="risk-row">🛡 종합 위험도 <span class="badge high">높음</span></div>
+        </div>
+
+        <div class="ai-result">
+          <strong>AI 분석 결과</strong>
+          현재 하교 시간대 차량 이동량 증가로 학교 정문 방향 산책 위험도가 높습니다. 공원 방향 우회 경로를 추천합니다.
+        </div>
+      </section>
+
+      <section class="safezone-card">
+        <h2>주변 세이프존</h2>
+        <div class="place">🏥 부산동물병원 <span>350m</span></div>
+        <div class="place">☕ 펫가능 카페 <span>480m</span></div>
+        <div class="place">🌳 서면 반려공원 <span>620m</span></div>
+        <div class="place">🏠 시민공원 반려쉼터 <span>800m</span></div>
+      </section>
+
+      <div class="legend">
+        <span><i class="dot d-red"></i>매우 높음</span>
+        <span><i class="dot d-orange"></i>높음</span>
+        <span><i class="dot d-yellow"></i>주의</span>
+        <span><i class="dot d-green"></i>보통</span>
+        <span><i class="dot d-blue"></i>학교</span>
+      </div>
+    </main>
+  </div>
+</body>
+</html>
