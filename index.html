@@ -53,6 +53,35 @@
         linear-gradient(rgba(7,148,141,.06) 1px, transparent 1px),
         #f8fbfa;
       background-size: 64px 64px;
+      transition: background .25s ease;
+    }
+    .map.center {
+      background:
+        linear-gradient(90deg, rgba(7,148,141,.06) 1px, transparent 1px),
+        linear-gradient(rgba(7,148,141,.06) 1px, transparent 1px),
+        #f8fbfa;
+      background-size: 64px 64px;
+    }
+    .map.school {
+      background:
+        linear-gradient(90deg, rgba(32,81,163,.07) 1px, transparent 1px),
+        linear-gradient(rgba(32,81,163,.07) 1px, transparent 1px),
+        #f7faff;
+      background-size: 54px 54px;
+    }
+    .map.park {
+      background:
+        linear-gradient(90deg, rgba(38,185,120,.07) 1px, transparent 1px),
+        linear-gradient(rgba(38,185,120,.07) 1px, transparent 1px),
+        #f5fff8;
+      background-size: 70px 70px;
+    }
+    .map.river {
+      background:
+        linear-gradient(90deg, rgba(45,145,210,.07) 1px, transparent 1px),
+        linear-gradient(rgba(45,145,210,.07) 1px, transparent 1px),
+        #f5fbff;
+      background-size: 68px 68px;
     }
     .park {
       position: absolute;
@@ -73,6 +102,18 @@
       background: #bde4f4;
       border-radius: 50%;
       opacity: .8;
+      transition: all .25s ease;
+    }
+    .river-shape {
+      position: absolute;
+      left: 52%;
+      top: -40px;
+      width: 90px;
+      height: 900px;
+      background: rgba(80, 180, 230, .25);
+      border-radius: 999px;
+      transform: rotate(18deg);
+      display: none;
     }
     .building, .school, .hospital {
       position: absolute;
@@ -324,15 +365,16 @@
         <button onclick="showTab('safezone', this)">세이프존</button>
         <button onclick="showTab('process', this)">AI 분석 과정</button>
       </nav>
-      <div class="region">📍 OO지역</div>
+      <div class="region">📍 <span id="regionName">OO중심지역</span></div>
     </header>
 
     <main>
       <div class="toast" id="toast">AI가 안전 경로를 다시 분석했습니다.</div>
 
-      <div class="map">
+      <div class="map center" id="mapArea">
         <div class="park"></div>
-        <div class="pond"></div>
+        <div class="pond" id="pond"></div>
+        <div class="river-shape" id="riverShape"></div>
         <div class="road red r1" id="road1"></div>
         <div class="road red r2" id="road2"></div>
         <div class="road yellow r3" id="road3"></div>
@@ -360,6 +402,14 @@
         <h1>AI 산책 안전지도</h1>
         <p>교육 공공데이터의 학교 위치·학구도 정보를 기반으로 학생 반려인의 산책 위험도를 분석합니다.</p>
 
+        <div class="select-box">📍 지역 선택
+          <select id="regionSelect" onchange="changeRegion()">
+            <option value="center">OO중심지역</option>
+            <option value="school">OO학교밀집지역</option>
+            <option value="park">OO공원인접지역</option>
+            <option value="river">OO하천인접지역</option>
+          </select>
+        </div>
         <div class="select-box">🏫 학교 선택
           <select id="schoolSelect" onchange="changeSchool()">
             <option>OO고등학교</option>
@@ -367,7 +417,15 @@
             <option>OO특성화고등학교</option>
           </select>
         </div>
-        <div class="select-box" id="timeBox">🕖 시간 선택: 오후 7시 ~ 8시</div>
+        <div class="select-box">🕒 시간대 선택
+          <select id="timeSelect" onchange="changeTimeSelect()">
+            <option value="morning">오전 7시 ~ 8시</option>
+            <option value="noon">오전 11시 ~ 오후 12시</option>
+            <option value="afternoon">오후 3시 ~ 4시</option>
+            <option value="evening" selected>오후 7시 ~ 8시</option>
+            <option value="night">오후 10시 ~ 11시</option>
+          </select>
+        </div>
 
         <div class="button-row">
           <button class="btn primary" onclick="analyzeRoute()">AI 경로 분석</button>
@@ -446,32 +504,98 @@
     }
 
     function changeTime() {
-      const timeBox = document.getElementById('timeBox');
-      const isNight = timeBox.textContent.includes('오후 7시');
-      if (isNight) {
-        timeBox.textContent = '🕓 시간 선택: 오후 4시 ~ 5시';
-        document.getElementById('heatBadge').textContent = '높음';
-        document.getElementById('heatBadge').className = 'badge high';
-        document.getElementById('trafficBadge').textContent = '주의';
-        document.getElementById('trafficBadge').className = 'badge mid';
-        document.getElementById('lightBadge').textContent = '보통';
-        document.getElementById('lightBadge').className = 'badge low';
-        document.getElementById('totalBadge').textContent = '주의';
-        document.getElementById('totalBadge').className = 'badge mid';
-        document.getElementById('aiText').innerHTML = '<strong>AI 분석 결과</strong>오후 시간대는 조도 위험은 낮지만 폭염 위험이 높습니다. 그늘이 있는 OO녹지 방향의 짧은 산책을 권장합니다.';
-      } else {
-        timeBox.textContent = '🕖 시간 선택: 오후 7시 ~ 8시';
-        document.getElementById('heatBadge').textContent = '높음';
-        document.getElementById('heatBadge').className = 'badge high';
-        document.getElementById('trafficBadge').textContent = '높음';
-        document.getElementById('trafficBadge').className = 'badge high';
-        document.getElementById('lightBadge').textContent = '주의';
-        document.getElementById('lightBadge').className = 'badge mid';
-        document.getElementById('totalBadge').textContent = '높음';
-        document.getElementById('totalBadge').className = 'badge high';
-        document.getElementById('aiText').innerHTML = '<strong>AI 분석 결과</strong>현재 하교 이후 시간대와 차량 이동량 증가로 인해 학교 정문 방향 산책 위험도가 높습니다. OO공원 방향 우회 경로를 추천합니다.';
+      const select = document.getElementById('timeSelect');
+      const order = ['morning', 'noon', 'afternoon', 'evening', 'night'];
+      const currentIndex = order.indexOf(select.value);
+      select.value = order[(currentIndex + 1) % order.length];
+      changeTimeSelect();
+    }
+
+    function changeTimeSelect() {
+      const value = document.getElementById('timeSelect').value;
+      const settings = {
+        morning: {
+          heat: ['낮음', 'low'], traffic: ['주의', 'mid'], light: ['보통', 'low'], flood: ['낮음', 'low'], total: ['보통', 'low'],
+          text: '오전 시간대는 폭염 위험이 낮고 조도가 안정적입니다. 다만 등교 시간대와 겹칠 수 있어 학교 정문 앞 도로는 피하는 경로를 추천합니다.'
+        },
+        noon: {
+          heat: ['매우 높음', 'high'], traffic: ['보통', 'low'], light: ['보통', 'low'], flood: ['낮음', 'low'], total: ['높음', 'high'],
+          text: '한낮 시간대는 아스팔트 온도 상승으로 반려동물 발바닥 화상 위험이 높습니다. 짧은 산책 또는 실내 활동을 권장합니다.'
+        },
+        afternoon: {
+          heat: ['높음', 'high'], traffic: ['주의', 'mid'], light: ['보통', 'low'], flood: ['낮음', 'low'], total: ['주의', 'mid'],
+          text: '오후 시간대는 폭염 위험이 남아 있으므로 그늘이 있는 OO녹지 방향의 짧은 산책을 추천합니다.'
+        },
+        evening: {
+          heat: ['높음', 'high'], traffic: ['높음', 'high'], light: ['주의', 'mid'], flood: ['낮음', 'low'], total: ['높음', 'high'],
+          text: '하교 이후 시간대와 차량 이동량 증가로 인해 학교 정문 방향 산책 위험도가 높습니다. OO공원 방향 우회 경로를 추천합니다.'
+        },
+        night: {
+          heat: ['낮음', 'low'], traffic: ['보통', 'low'], light: ['높음', 'high'], flood: ['주의', 'mid'], total: ['주의', 'mid'],
+          text: '늦은 밤 시간대는 조도 부족과 인적이 드문 구간이 위험 요소입니다. 세이프존과 가까운 큰길 중심 경로를 추천합니다.'
+        }
+      };
+      const s = settings[value];
+      setBadge('heatBadge', s.heat);
+      setBadge('trafficBadge', s.traffic);
+      setBadge('lightBadge', s.light);
+      setBadge('floodBadge', s.flood);
+      setBadge('totalBadge', s.total);
+      document.getElementById('aiText').innerHTML = '<strong>AI 분석 결과</strong>' + s.text;
+      showToast('선택한 시간대 기준으로 위험도를 분석했습니다.');
+    }
+
+    function setBadge(id, data) {
+      const el = document.getElementById(id);
+      el.textContent = data[0];
+      el.className = 'badge ' + data[1];
+    }
+
+    function changeRegion() {
+      const value = document.getElementById('regionSelect').value;
+      const map = document.getElementById('mapArea');
+      const regionName = document.getElementById('regionName');
+      const river = document.getElementById('riverShape');
+      const park = document.querySelector('.park');
+      const pond = document.getElementById('pond');
+      const b1 = document.querySelector('.b1');
+      const b2 = document.querySelector('.b2');
+      const b3 = document.querySelector('.b3');
+      const hospital = document.querySelector('.hospital');
+
+      map.className = 'map ' + value;
+      river.style.display = 'none';
+      park.style.right = '80px'; park.style.top = '160px'; park.style.width = '420px'; park.style.height = '520px';
+      pond.style.right = '210px'; pond.style.top = '425px'; pond.style.width = '130px'; pond.style.height = '82px';
+
+      if (value === 'center') {
+        regionName.textContent = 'OO중심지역';
+        b1.textContent = '🚉 OO역'; b2.textContent = '🌳 OO공원'; b3.textContent = '🌲 OO녹지'; hospital.textContent = '🏥 OO동물병원';
+        document.getElementById('aiText').innerHTML = '<strong>AI 분석 결과</strong>중심지역은 차량 통행량과 보행 밀도가 높아 큰 도로 주변 산책 위험도가 높습니다. 공원 방향 우회 경로를 추천합니다.';
       }
-      showToast('시간대별 위험도가 변경되었습니다.');
+      if (value === 'school') {
+        regionName.textContent = 'OO학교밀집지역';
+        b1.textContent = '🏫 OO학교군'; b2.textContent = '📚 OO교육시설'; b3.textContent = '🌳 소규모 녹지'; hospital.textContent = '🏥 OO동물의료센터';
+        park.style.right = '120px'; park.style.top = '210px'; park.style.width = '300px'; park.style.height = '420px';
+        document.getElementById('aiText').innerHTML = '<strong>AI 분석 결과</strong>학교밀집지역은 등·하교 시간대 학생 이동량이 많아 반려동물 산책 시 충돌 위험을 고려해야 합니다. 통학 동선과 분리된 경로를 추천합니다.';
+      }
+      if (value === 'park') {
+        regionName.textContent = 'OO공원인접지역';
+        b1.textContent = '🚌 OO정류장'; b2.textContent = '🌳 대형 OO공원'; b3.textContent = '🐾 반려쉼터'; hospital.textContent = '🏥 OO동물병원';
+        park.style.right = '40px'; park.style.top = '90px'; park.style.width = '560px'; park.style.height = '620px';
+        pond.style.right = '330px'; pond.style.top = '330px'; pond.style.width = '170px'; pond.style.height = '110px';
+        document.getElementById('aiText').innerHTML = '<strong>AI 분석 결과</strong>공원인접지역은 산책 적합도가 높지만 주말·저녁 시간대 보행 밀도가 증가할 수 있습니다. 공원 외곽 순환 경로를 추천합니다.';
+      }
+      if (value === 'river') {
+        regionName.textContent = 'OO하천인접지역';
+        b1.textContent = '🌉 OO교'; b2.textContent = '🌿 하천 산책로'; b3.textContent = '🏠 임시 대피공간'; hospital.textContent = '🏥 OO동물병원';
+        river.style.display = 'block';
+        park.style.right = '130px'; park.style.top = '210px'; park.style.width = '330px'; park.style.height = '430px';
+        pond.style.right = '150px'; pond.style.top = '520px';
+        document.getElementById('aiText').innerHTML = '<strong>AI 분석 결과</strong>하천인접지역은 우천 후 침수·미끄럼 위험을 확인해야 합니다. 비 예보가 있는 날은 하천변보다 큰길 중심 경로를 추천합니다.';
+      }
+      changeTimeSelect();
+      showToast('선택한 지역 유형에 맞게 지도를 변경했습니다.');
     }
 
     function showSafeZones() {
