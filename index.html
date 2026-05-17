@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>PetPath AI 산책 안전지도</title>
+  <title>PETPETH AI 반려동물 산책 안전지도</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -12,12 +12,7 @@
       background: #f4faf9;
       color: #123;
     }
-    .app {
-      width: 100%;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
+    .app { width: 100%; min-height: 100vh; display: flex; flex-direction: column; }
     header {
       height: 78px;
       background: rgba(255,255,255,0.96);
@@ -27,38 +22,29 @@
       padding: 0 34px;
       border-bottom: 1px solid #e3ecea;
       box-shadow: 0 4px 18px rgba(20,60,70,.06);
-      z-index: 5;
+      z-index: 10;
     }
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-weight: 900;
-      font-size: 28px;
-      color: #073b63;
-    }
+    .logo { display: flex; align-items: center; gap: 10px; font-weight: 900; font-size: 27px; color: #073b63; }
     .logo span { color: #13a39a; }
-    nav {
-      display: flex;
-      gap: 32px;
-      font-size: 15px;
+    nav { display: flex; gap: 22px; font-size: 14px; color: #485b65; font-weight: 800; }
+    nav button {
+      background: transparent;
+      border: 0;
+      cursor: pointer;
       color: #485b65;
-      font-weight: 700;
+      font: inherit;
+      padding: 28px 0 24px;
     }
-    nav .active { color: #07948d; border-bottom: 3px solid #07948d; padding-bottom: 26px; }
+    nav button.active { color: #07948d; border-bottom: 3px solid #07948d; }
     .region {
       padding: 12px 18px;
       border: 1px solid #d9e5e2;
       border-radius: 12px;
       background: #fff;
-      font-weight: 700;
+      font-weight: 800;
       color: #41535b;
     }
-    main {
-      position: relative;
-      flex: 1;
-      overflow: hidden;
-    }
+    main { position: relative; flex: 1; overflow: hidden; min-height: calc(100vh - 78px); }
     .map {
       position: absolute;
       inset: 0;
@@ -95,27 +81,16 @@
       background: #fff;
       border: 1px solid #dce8e6;
       box-shadow: 0 8px 26px rgba(20,50,70,.08);
-      font-weight: 800;
+      font-weight: 900;
       color: #27414d;
       white-space: nowrap;
     }
-    .school {
-      left: 55%;
-      top: 43%;
-      transform: translate(-50%,-50%);
-      background: #eaf2ff;
-      border-color: #b8d3ff;
-      color: #2051a3;
-    }
+    .school { left: 55%; top: 43%; transform: translate(-50%,-50%); background: #eaf2ff; border-color: #b8d3ff; color: #2051a3; }
     .hospital { left: 58%; top: 63%; color: #c74343; }
     .building.b1 { left: 43%; top: 14%; }
     .building.b2 { right: 160px; top: 255px; background: #ecfff5; color: #127a4d; }
     .building.b3 { right: 210px; bottom: 210px; background: #ecfff5; color: #127a4d; }
-    .road {
-      position: absolute;
-      border-radius: 999px;
-      opacity: .78;
-    }
+    .road { position: absolute; border-radius: 999px; opacity: .78; transition: all .25s ease; }
     .road.red { background: #ff6b5f; box-shadow: 0 0 0 18px rgba(255,107,95,.16); }
     .road.orange { background: #ffa345; box-shadow: 0 0 0 16px rgba(255,163,69,.15); }
     .road.yellow { background: #ffd15c; box-shadow: 0 0 0 14px rgba(255,209,92,.16); }
@@ -136,6 +111,7 @@
       border-radius: 45% 55% 50% 50%;
       transform: rotate(-8deg);
       filter: drop-shadow(0 3px 0 rgba(0,0,0,.08));
+      transition: all .25s ease;
     }
     .pin {
       position: absolute;
@@ -150,6 +126,7 @@
       font-size: 20px;
       font-weight: 900;
       box-shadow: 0 8px 20px rgba(0,0,0,.18);
+      cursor: pointer;
     }
     .pin span { transform: rotate(45deg); }
     .pin.red { background:#ef4444; }
@@ -166,40 +143,49 @@
       position: absolute;
       left: 28px;
       top: 28px;
-      width: 355px;
-      background: rgba(255,255,255,.94);
+      width: 370px;
+      background: rgba(255,255,255,.95);
       border: 1px solid #dfe9e7;
       border-radius: 22px;
       box-shadow: 0 16px 38px rgba(18,52,68,.12);
       padding: 24px;
+      z-index: 4;
     }
-    h1 { margin: 0 0 10px; color: #078981; font-size: 28px; }
-    .panel p { margin: 0 0 18px; color: #53656e; line-height: 1.55; font-size: 14px; }
+    h1 { margin: 0 0 10px; color: #078981; font-size: 27px; }
+    .panel p { margin: 0 0 16px; color: #53656e; line-height: 1.55; font-size: 14px; }
     .select-box {
       border: 1px solid #dbe6e5;
       border-radius: 14px;
       padding: 14px;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
       background: #fff;
-      font-weight: 700;
+      font-weight: 800;
       color: #334b56;
     }
-    .risk-list { margin-top: 18px; border-top: 1px solid #edf2f1; }
+    .button-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 14px 0; }
+    .btn {
+      border: 0;
+      cursor: pointer;
+      border-radius: 14px;
+      padding: 12px 10px;
+      font-weight: 900;
+      background: #e8f8f6;
+      color: #078981;
+      transition: all .2s ease;
+    }
+    .btn:hover { transform: translateY(-1px); box-shadow: 0 8px 16px rgba(7,148,141,.13); }
+    .btn.primary { background: #07948d; color: #fff; }
+    .risk-list { margin-top: 14px; border-top: 1px solid #edf2f1; }
     .risk-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 13px 0;
+      padding: 12px 0;
       border-bottom: 1px solid #edf2f1;
       font-size: 14px;
-      font-weight: 700;
+      font-weight: 800;
     }
-    .badge {
-      padding: 6px 10px;
-      border-radius: 999px;
-      color: white;
-      font-size: 12px;
-    }
+    .badge { padding: 6px 10px; border-radius: 999px; color: white; font-size: 12px; }
     .high { background:#ef5b45; }
     .mid { background:#f6b93b; color:#563b00; }
     .low { background:#2eb872; }
@@ -214,32 +200,27 @@
       box-shadow: 0 12px 24px rgba(7,148,141,.22);
     }
     .ai-result strong { display: block; margin-bottom: 8px; font-size: 17px; }
-    .safezone-card {
+    .safezone-card, .info-card {
       position: absolute;
       right: 34px;
       bottom: 36px;
-      width: 355px;
-      background: rgba(255,255,255,.94);
+      width: 365px;
+      background: rgba(255,255,255,.95);
       border: 1px solid #dfe9e7;
       border-radius: 22px;
       padding: 20px;
       box-shadow: 0 16px 38px rgba(18,52,68,.12);
+      z-index: 4;
     }
-    .safezone-card h2 { margin:0 0 12px; font-size:20px; color:#123b50; }
-    .place {
-      display: flex;
-      justify-content: space-between;
-      padding: 12px 0;
-      border-bottom: 1px solid #eef3f2;
-      font-size: 14px;
-      color: #40535c;
-      font-weight: 700;
-    }
+    .safezone-card h2, .info-card h2 { margin:0 0 12px; font-size:20px; color:#123b50; }
+    .place { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eef3f2; font-size: 14px; color: #40535c; font-weight: 800; }
+    .info-card { display: none; top: 110px; bottom: auto; }
+    .info-card ul { margin: 8px 0 0 18px; padding: 0; color: #41535b; line-height: 1.8; font-weight: 700; font-size: 14px; }
     .legend {
       position: absolute;
       left: 420px;
       bottom: 36px;
-      background: rgba(255,255,255,.94);
+      background: rgba(255,255,255,.95);
       border: 1px solid #dfe9e7;
       border-radius: 16px;
       padding: 14px 18px;
@@ -248,8 +229,9 @@
       align-items: center;
       box-shadow: 0 12px 28px rgba(18,52,68,.10);
       font-size: 13px;
-      font-weight: 700;
+      font-weight: 800;
       color: #4a5d65;
+      z-index: 4;
     }
     .dot { width:14px; height:14px; border-radius:50%; display:inline-block; margin-right:6px; vertical-align:-2px; }
     .d-red { background:#ef4444; } .d-orange{background:#f97316;} .d-yellow{background:#facc15;} .d-green{background:#22c55e;} .d-blue{background:#3b82f6;}
@@ -260,56 +242,72 @@
       background: white;
       border: 1px solid #d9e8e4;
       box-shadow: 0 8px 20px rgba(0,0,0,.08);
-      font-weight: 800;
+      font-weight: 900;
       color: #31505e;
       font-size: 13px;
     }
     .l1 { left: 62%; top: 35%; color:#e25b2d; }
     .l2 { left: 70%; top: 45%; color:#8360b8; }
     .l3 { left: 67%; top: 53%; color:#119c61; background:#eafff4; }
+    .toast {
+      position: absolute;
+      left: 50%;
+      top: 96px;
+      transform: translateX(-50%);
+      background: #123b50;
+      color: #fff;
+      padding: 12px 18px;
+      border-radius: 999px;
+      font-weight: 800;
+      box-shadow: 0 12px 28px rgba(0,0,0,.18);
+      display: none;
+      z-index: 20;
+    }
     @media (max-width: 900px) {
       header { padding: 0 18px; }
       nav { display: none; }
+      .region { display: none; }
       .panel { width: calc(100% - 40px); left: 20px; top: 20px; }
-      .safezone-card, .legend { display:none; }
+      .safezone-card, .legend, .info-card { display:none !important; }
     }
   </style>
 </head>
 <body>
   <div class="app">
     <header>
-      <div class="logo">🐾 PetPath <span>AI</span></div>
+      <div class="logo">🐾 PETPETH <span>AI</span></div>
       <nav>
-        <div>홈</div>
-        <div class="active">AI 안전지도</div>
-        <div>세이프존</div>
-        <div>추천 산책코스</div>
-        <div>데이터 분석</div>
+        <button class="active" onclick="showTab('map', this)">AI 안전지도</button>
+        <button onclick="showTab('data', this)">활용 데이터</button>
+        <button onclick="showTab('safezone', this)">세이프존</button>
+        <button onclick="showTab('process', this)">AI 분석 과정</button>
       </nav>
-      <div class="region">📍 ㅇㅇ구</div>
+      <div class="region">📍 OO지역</div>
     </header>
 
     <main>
+      <div class="toast" id="toast">AI가 안전 경로를 다시 분석했습니다.</div>
+
       <div class="map">
         <div class="park"></div>
         <div class="pond"></div>
-        <div class="road red r1"></div>
-        <div class="road red r2"></div>
-        <div class="road yellow r3"></div>
-        <div class="road green r4"></div>
-        <div class="safe-route"></div>
+        <div class="road red r1" id="road1"></div>
+        <div class="road red r2" id="road2"></div>
+        <div class="road yellow r3" id="road3"></div>
+        <div class="road green r4" id="road4"></div>
+        <div class="safe-route" id="route"></div>
 
-        <div class="building b1">🚉 ㅇㅇ역</div>
-        <div class="building b2">🌳 ㅇㅇ공원</div>
-        <div class="building b3">🌲 ㅇㅇ공원</div>
-        <div class="school">🏫 ㅇㅇ고등학교</div>
-        <div class="hospital">🏥 ㅇㅇ동물병원 24시</div>
+        <div class="building b1">🚉 OO역</div>
+        <div class="building b2">🌳 OO공원</div>
+        <div class="building b3">🌲 OO녹지</div>
+        <div class="school">🏫 OO고등학교</div>
+        <div class="hospital">🏥 OO동물병원</div>
 
-        <div class="pin red p1"><span>🚗</span></div>
-        <div class="pin purple p2"><span>🐾</span></div>
-        <div class="pin orange p3"><span>🌡</span></div>
-        <div class="pin green p4"><span>🏠</span></div>
-        <div class="pin blue p5"><span>➕</span></div>
+        <div class="pin red p1" onclick="pinInfo('차량 통행량이 높은 위험 구간입니다.')"><span>🚗</span></div>
+        <div class="pin purple p2" onclick="pinInfo('학생 생활 동선과 산책 경로가 겹치는 구간입니다.')"><span>🐾</span></div>
+        <div class="pin orange p3" onclick="pinInfo('폭염 시간대 아스팔트 온도 상승 위험이 있습니다.')"><span>🌡</span></div>
+        <div class="pin green p4" onclick="pinInfo('응급 상황 시 이용 가능한 세이프존입니다.')"><span>🏠</span></div>
+        <div class="pin blue p5" onclick="pinInfo('근거리 동물병원 위치입니다.')"><span>➕</span></div>
 
         <div class="label l1">교통·도로 위험</div>
         <div class="label l2">야간 조도 정보</div>
@@ -318,31 +316,43 @@
 
       <section class="panel">
         <h1>AI 산책 안전지도</h1>
-        <p>학교 주변 통학 환경과 지역 데이터를 기반으로 반려동물 산책 위험도를 분석합니다.</p>
+        <p>교육 공공데이터의 학교 위치·학구도 정보를 기반으로 학생 반려인의 산책 위험도를 분석합니다.</p>
 
-        <div class="select-box">🏫 학교 선택: ㅇㅇ고등학교</div>
-        <div class="select-box">🕖 시간 선택: 오후 7시 ~ 8시</div>
+        <div class="select-box">🏫 학교 선택: OO고등학교</div>
+        <div class="select-box" id="timeBox">🕖 시간 선택: 오후 7시 ~ 8시</div>
 
-        <div class="risk-list">
-          <div class="risk-row">🌡 폭염 위험 <span class="badge high">높음</span></div>
-          <div class="risk-row">🚗 교통량 위험 <span class="badge high">높음</span></div>
-          <div class="risk-row">💡 야간 조도 <span class="badge mid">주의</span></div>
-          <div class="risk-row">🌧 침수 위험 <span class="badge low">낮음</span></div>
-          <div class="risk-row">🛡 종합 위험도 <span class="badge high">높음</span></div>
+        <div class="button-row">
+          <button class="btn primary" onclick="analyzeRoute()">AI 경로 분석</button>
+          <button class="btn" onclick="changeTime()">시간대 변경</button>
+          <button class="btn" onclick="showSafeZones()">세이프존 보기</button>
+          <button class="btn" onclick="resetMap()">초기화</button>
         </div>
 
-        <div class="ai-result">
+        <div class="risk-list">
+          <div class="risk-row">🌡 폭염 위험 <span class="badge high" id="heatBadge">높음</span></div>
+          <div class="risk-row">🚗 교통량 위험 <span class="badge high" id="trafficBadge">높음</span></div>
+          <div class="risk-row">💡 야간 조도 <span class="badge mid" id="lightBadge">주의</span></div>
+          <div class="risk-row">🌧 침수 위험 <span class="badge low" id="floodBadge">낮음</span></div>
+          <div class="risk-row">🛡 종합 위험도 <span class="badge high" id="totalBadge">높음</span></div>
+        </div>
+
+        <div class="ai-result" id="aiText">
           <strong>AI 분석 결과</strong>
-          현재 하교 시간대 차량 이동량 증가로 학교 정문 방향 산책 위험도가 높습니다. 공원 방향 우회 경로를 추천합니다.
+          현재 하교 이후 시간대와 차량 이동량 증가로 인해 학교 정문 방향 산책 위험도가 높습니다. OO공원 방향 우회 경로를 추천합니다.
         </div>
       </section>
 
-      <section class="safezone-card">
+      <section class="safezone-card" id="safezoneCard">
         <h2>주변 세이프존</h2>
-        <div class="place">🏥 ㅇㅇ동물병원 <span>350m</span></div>
-        <div class="place">☕ 펫가능 카페 <span>480m</span></div>
-        <div class="place">🌳 반려공원 <span>620m</span></div>
-        <div class="place">🏠 반려쉼터 <span>800m</span></div>
+        <div class="place">🏥 OO동물병원 <span>350m</span></div>
+        <div class="place">☕ 반려동물 동반 가능 공간 <span>480m</span></div>
+        <div class="place">🌳 OO반려공원 <span>620m</span></div>
+        <div class="place">🏠 OO반려쉼터 <span>800m</span></div>
+      </section>
+
+      <section class="info-card" id="infoCard">
+        <h2 id="infoTitle">활용 데이터</h2>
+        <ul id="infoList"></ul>
       </section>
 
       <div class="legend">
@@ -354,5 +364,107 @@
       </div>
     </main>
   </div>
+
+  <script>
+    const toast = document.getElementById('toast');
+    const infoCard = document.getElementById('infoCard');
+    const infoTitle = document.getElementById('infoTitle');
+    const infoList = document.getElementById('infoList');
+    const safezoneCard = document.getElementById('safezoneCard');
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.style.display = 'block';
+      setTimeout(() => toast.style.display = 'none', 1800);
+    }
+
+    function analyzeRoute() {
+      document.getElementById('route').style.borderColor = '#05c46b';
+      document.getElementById('route').style.borderLeftColor = 'transparent';
+      document.getElementById('road1').className = 'road orange r1';
+      document.getElementById('road2').className = 'road red r2';
+      document.getElementById('road3').className = 'road yellow r3';
+      document.getElementById('road4').className = 'road green r4';
+      document.getElementById('aiText').innerHTML = '<strong>AI 분석 결과</strong>학교 인근 통학 동선과 교통 위험 구간을 회피하여 OO공원 방향 우회 경로를 추천합니다. 현재 시간대에는 녹지 중심 경로가 가장 안전합니다.';
+      showToast('AI가 안전 경로를 다시 분석했습니다.');
+    }
+
+    function changeTime() {
+      const timeBox = document.getElementById('timeBox');
+      const isNight = timeBox.textContent.includes('오후 7시');
+      if (isNight) {
+        timeBox.textContent = '🕓 시간 선택: 오후 4시 ~ 5시';
+        document.getElementById('heatBadge').textContent = '높음';
+        document.getElementById('heatBadge').className = 'badge high';
+        document.getElementById('trafficBadge').textContent = '주의';
+        document.getElementById('trafficBadge').className = 'badge mid';
+        document.getElementById('lightBadge').textContent = '보통';
+        document.getElementById('lightBadge').className = 'badge low';
+        document.getElementById('totalBadge').textContent = '주의';
+        document.getElementById('totalBadge').className = 'badge mid';
+        document.getElementById('aiText').innerHTML = '<strong>AI 분석 결과</strong>오후 시간대는 조도 위험은 낮지만 폭염 위험이 높습니다. 그늘이 있는 OO녹지 방향의 짧은 산책을 권장합니다.';
+      } else {
+        timeBox.textContent = '🕖 시간 선택: 오후 7시 ~ 8시';
+        document.getElementById('heatBadge').textContent = '높음';
+        document.getElementById('heatBadge').className = 'badge high';
+        document.getElementById('trafficBadge').textContent = '높음';
+        document.getElementById('trafficBadge').className = 'badge high';
+        document.getElementById('lightBadge').textContent = '주의';
+        document.getElementById('lightBadge').className = 'badge mid';
+        document.getElementById('totalBadge').textContent = '높음';
+        document.getElementById('totalBadge').className = 'badge high';
+        document.getElementById('aiText').innerHTML = '<strong>AI 분석 결과</strong>현재 하교 이후 시간대와 차량 이동량 증가로 인해 학교 정문 방향 산책 위험도가 높습니다. OO공원 방향 우회 경로를 추천합니다.';
+      }
+      showToast('시간대별 위험도가 변경되었습니다.');
+    }
+
+    function showSafeZones() {
+      safezoneCard.style.display = 'block';
+      infoCard.style.display = 'none';
+      showToast('주변 세이프존 정보를 표시했습니다.');
+    }
+
+    function resetMap() {
+      document.getElementById('road1').className = 'road red r1';
+      document.getElementById('road2').className = 'road red r2';
+      document.getElementById('road3').className = 'road yellow r3';
+      document.getElementById('road4').className = 'road green r4';
+      infoCard.style.display = 'none';
+      safezoneCard.style.display = 'block';
+      showToast('지도를 초기 상태로 되돌렸습니다.');
+    }
+
+    function pinInfo(message) {
+      document.getElementById('aiText').innerHTML = '<strong>선택 지점 분석</strong>' + message;
+      showToast('선택한 지점의 정보를 분석했습니다.');
+    }
+
+    function showTab(type, btn) {
+      document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      safezoneCard.style.display = type === 'safezone' || type === 'map' ? 'block' : 'none';
+
+      if (type === 'map') {
+        infoCard.style.display = 'none';
+        showToast('AI 안전지도로 이동했습니다.');
+        return;
+      }
+
+      infoCard.style.display = 'block';
+      if (type === 'data') {
+        infoTitle.textContent = '활용 데이터';
+        infoList.innerHTML = '<li>학교 위치 데이터: 학생 생활 동선 기준점 설정</li><li>학구도 데이터: 통학권역 및 이동 범위 분석</li><li>기상 데이터: 폭염·우천 위험도 반영</li><li>지역 안전 데이터: 공원·동물병원·쉼터 정보 결합</li>';
+      }
+      if (type === 'safezone') {
+        infoTitle.textContent = '세이프존 안내';
+        infoList.innerHTML = '<li>응급 상황 시 가까운 동물병원 안내</li><li>반려동물 동반 가능 휴식 공간 표시</li><li>폭염 시간대 이용 가능한 그늘·녹지 정보 제공</li><li>위험 구간 회피를 위한 안전 경로 추천</li>';
+      }
+      if (type === 'process') {
+        infoTitle.textContent = 'AI 분석 과정';
+        infoList.innerHTML = '<li>1단계: 교육 공공데이터 수집</li><li>2단계: 학교 주변 위험 요소 점수화</li><li>3단계: 기상·교통·지역 데이터 결합</li><li>4단계: AI 기반 위험도 분석 및 추천 경로 생성</li>';
+      }
+      showToast('선택한 정보를 표시했습니다.');
+    }
+  </script>
 </body>
 </html>
